@@ -4,6 +4,7 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import { CardActionArea } from '@mui/material';
+import logo from '../logo.svg';
 import '../App.css';
 import { useGlobalState } from './GlobalState';
 const solanaWeb3 = require('@solana/web3.js');
@@ -207,118 +208,146 @@ function TransactionList() {
 
     return (
         <div>
-            <div className='Menu'>
-                <div className="container d-flex">
-                    <p className="me-2" placeholder="Search" type="text" style={{ color: 'white' }}>{Loading ? "" : "Loading Data"}</p>
-                    <input className="form-control text-box me-2" placeholder="Search" type="text" value={walletAddress} onChange={handleWalletAddressChange} />
-                    <select className="form-select select-dropdown me-2" value={network} onChange={handleNetworkChange}>
-                        <option value="Ethereum">Ethereum</option>
-                        <option value="Solana">Solana</option>
-                    </select>
-                    <button className="btn btn-outline-success" onClick={handleSearchClick} >Search</button>
-                    <Link onClick={handlePassParams} to="/matching" className='btn btn-primary margin-left-button'>Matching</Link>
-                    <button className='btn btn-danger margin-left-button' onClick={clearList}>Clear</button>
-
-                </div>
-            </div>
-
-            <div className="row right-column-margin">
-                <div className="col-6 col-md-5 list-margin">
-                    <p className='fixed-position'><b>Outbound Transaction : </b></p>
-                    <div className='list-box'>
-                        {outboundTransactions.map((tx) => {
-                            return (
-                                <Card key={tx.hash} sx={{ maxWidth: 700 }} className="card-margin">
-                                    <CardActionArea>
-                                        <CardContent>
-                                            <Typography gutterBottom className="title" component="div">
-                                                Transaction Hash : {tx.hash}
-                                            </Typography>
-
-                                            <Typography gutterBottom className="title" component="div">
-                                                Block Number : {tx.blockNumber}
-                                            </Typography>
-
-                                            <Typography gutterBottom className="title" component="div">
-                                                Amount : {tx.value}
-                                            </Typography>
-
-                                            <Typography gutterBottom className="title" component="div">
-                                                Timestamp : {new Date(parseInt(tx.timeStamp) * 1000).toLocaleString()}
-                                            </Typography>
-
-                                            {tx.Status === "true" ?
-                                                <Typography gutterBottom className="title" component="div" style={{ fontWeight: '600' }}>
-                                                    Is Bridge : {tx.Status}
-                                                </Typography>
-                                                :
-                                                <div></div>
-                                            }
-
-                                            <Typography gutterBottom className="title" component="div">
-                                                From : {tx.from}
-                                            </Typography>
-
-                                            <Typography gutterBottom className="title" component="div">
-                                                To : {tx.to}
-                                            </Typography>
-
-                                        </CardContent>
-                                    </CardActionArea>
-                                </Card>
-                            );
-                        })}
-                    </div>
-
-                </div>
-                <div className="col-6 col-md-5 list-margin">
-                    <p className='fixed-position'><b>Inbound Transaction : </b></p>
-                    <div className='list-box'>
-                        {inboundTransactions.map((tx) => {
-                            return (
-                                <Card key={tx.hash} sx={{ maxWidth: 600 }} className="card-margin">
-                                    <CardActionArea>
-                                        <CardContent>
-                                            <Typography gutterBottom className="title" component="div">
-                                                Transaction Hash : {tx.hash}
-                                            </Typography>
-
-                                            <Typography gutterBottom className="title" component="div">
-                                                Block Number : {tx.blockNumber}
-                                            </Typography>
-
-                                            <Typography gutterBottom className="title" component="div">
-                                                Amount : {tx.value}
-                                            </Typography>
-
-                                            <Typography gutterBottom className="title" component="div">
-                                                Timestamp : {new Date(parseInt(tx.timeStamp) * 1000).toLocaleString()}
-                                            </Typography>
-
-                                            {tx.Status === "true" ?
-                                                <Typography gutterBottom className="title" component="div" style={{ fontWeight: '600' }}>
-                                                    Is Bridge : {tx.Status}
-                                                </Typography>
-                                                :
-                                                <div></div>
-                                            }
-
-                                            <Typography gutterBottom className="title" component="div">
-                                                From : {tx.from}
-                                            </Typography>
-
-                                            <Typography gutterBottom className="title" component="div">
-                                                To : {tx.to}
-                                            </Typography>
-
-                                        </CardContent>
-                                    </CardActionArea>
-                                </Card>
-                            );
-                        })}
+            <header>
+                <img src={logo} width="208" height="33" className='logo' />
+                <div className="container">
+                    <div className='row'>
+                        <div className='col'>
+                            <ul className='d-flex'>
+                                <li>
+                                    <input className="form-control" placeholder="Enter wallet address" type="text" value={walletAddress} onChange={handleWalletAddressChange} />
+                                </li>
+                                <li>
+                                    <select className="form-select" value={network} onChange={handleNetworkChange}>
+                                        <option value="Ethereum">Ethereum</option>
+                                        <option value="Solana">Solana</option>
+                                    </select>
+                                </li>
+                                <li>
+                                    <button className="btn btn-primary" onClick={handleSearchClick} >Search transaction</button>
+                                </li>
+                                <li>
+                                    <Link onClick={handlePassParams} to="/matching" className='btn btn-primary-outline'>Match transaction</Link>
+                                    {/* <button className='btn btn-danger margin-left-button' onClick={clearList}>Clear</button> */}
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            </div>
+                <label className='loading' type="text">{Loading ? "" : "Data is loading..."}</label>
+            </header>
+            
+            <main className="container">
+                
+                <div className='row gx-5'>
+                    <div className="col-6">
+                        <h3>Outbound Transaction</h3>
+                        <div className='card-holder'>
+                            {outboundTransactions.map((tx) => {
+                                return (
+                                    <Card key={tx.hash} sx={{ maxWidth: 700 }}>
+                                        <CardActionArea>
+                                            <CardContent>
+                                                <Typography gutterBottom className="title" component="div">
+                                                    <h4>Transaction Hash:</h4> 
+                                                    <label className='sml'>{tx.hash}</label>
+                                                </Typography>
+
+                                                <Typography gutterBottom className="title" component="div">
+                                                    <h4>Block Number:</h4> 
+                                                    <label>{tx.blockNumber}</label>
+                                                </Typography>
+
+                                                <Typography gutterBottom className="title" component="div">
+                                                    <h4>Amount:</h4> 
+                                                    <label>{tx.value}</label>
+                                                </Typography>
+
+                                                <Typography gutterBottom className="title" component="div">
+                                                    <h4>Timestamp:</h4>
+                                                    <label>{new Date(parseInt(tx.timeStamp) * 1000).toLocaleString()}</label>
+                                                </Typography>
+
+                                                {tx.Status === "true" ?
+                                                    <Typography gutterBottom className="title" component="div" style={{ fontWeight: '600' }}>
+                                                        Is Bridge: {tx.Status}
+                                                    </Typography>
+                                                    :
+                                                    <div></div>
+                                                }
+
+                                                <Typography gutterBottom className="title" component="div">
+                                                    <h4>From:</h4> 
+                                                    <label>{tx.from}</label>
+                                                </Typography>
+
+                                                <Typography gutterBottom className="title" component="div">
+                                                    <h4>To:</h4>
+                                                    <label>{tx.to}</label>
+                                                </Typography>
+
+                                            </CardContent>
+                                        </CardActionArea>
+                                    </Card>
+                                );
+                            })}
+                        </div>
+                    </div>
+                    <div className="col-6 block-inbound">
+                        <h3>Inbound Transaction</h3>
+                        <div className='card-holder'>
+                            {inboundTransactions.map((tx) => {
+                                return (
+                                    <Card key={tx.hash} sx={{ maxWidth: 600 }}>
+                                        <CardActionArea>
+                                            <CardContent>
+                                                <Typography gutterBottom className="title" component="div">
+                                                    <h4>Transaction Hash:</h4>
+                                                    <label>{tx.hash}</label>
+                                                </Typography>
+
+                                                <Typography gutterBottom className="title" component="div">
+                                                    <h4>Block Number:</h4>
+                                                    <label>{tx.blockNumber}</label>
+                                                </Typography>
+
+                                                <Typography gutterBottom className="title" component="div">
+                                                    <h4>Amount:</h4>
+                                                    <label>{tx.value}</label>
+                                                </Typography>
+
+                                                <Typography gutterBottom className="title" component="div">
+                                                    <h4>Timestamp:</h4>
+                                                    <label>{new Date(parseInt(tx.timeStamp) * 1000).toLocaleString()}</label>
+                                                </Typography>
+
+                                                {tx.Status === "true" ?
+                                                    <Typography gutterBottom className="title" component="div" style={{ fontWeight: '600' }}>
+                                                        Is Bridge : {tx.Status}
+                                                    </Typography>
+                                                    :
+                                                    <div></div>
+                                                }
+
+                                                <Typography gutterBottom className="title" component="div">
+                                                    <h4>From:</h4>
+                                                    <label>{tx.from}</label>
+                                                </Typography>
+
+                                                <Typography gutterBottom className="title" component="div">
+                                                    <h4>To:</h4>
+                                                    <label>{tx.to}</label>
+                                                </Typography>
+
+                                            </CardContent>
+                                        </CardActionArea>
+                                    </Card>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+            </main>
         </div>
     );
 }
