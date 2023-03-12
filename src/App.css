@@ -1,0 +1,145 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.Menu
+{
+  box-sizing: border-box;
+  height: 20%;
+  width: 100%;
+  background-color: #282c34;
+  position: fixed;
+  z-index: 1;
+}
+
+.d-flex
+{
+  position: relative;
+  top: 15%;
+}
+.text-box
+{
+  width: 400px;
+}
+
+.select-dropdown
+{
+  width: 200px;
+}
+.row {
+  position: relative;
+  top: -50px;
+
+}
+
+.column {
+  float: left;
+  width: 50%;
+  padding: 10px;
+  height: 300px; /* Should be removed. Only for demonstration */
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.title
+{
+  font-size: 10px !important;
+  word-wrap: break-word;      
+}
+
+.card-margin 
+{
+  z-index: -1;
+  margin-bottom: 1%;
+  background-color: #5c5e62 !important;
+  color: azure !important;
+}
+
+.list-margin
+{
+  margin-top: 10%;
+}
+
+.left-column-margin
+{
+  margin-left: 10%;
+}
+
+.right-column-margin
+{
+  margin-left: 15% !important;
+}
+
+.bottom-navbar{
+  box-sizing: border-box;
+  width: 100%;
+  height: 75px;
+  background-color: #282c34;
+  position: fixed;
+  bottom: 0;
+}
+
+
+.fixed-position{
+  position: fixed;
+  top: 80px;
+  z-index: 1000;
+  color: aliceblue;
+}
+
+.list-box{
+  position: relative !important;
+  top: 80px;
+  z-index: -1;
+  box-sizing: border-box;
+  width: auto;
+  height: auto;
+}
+
+.margin-subList{
+  margin-left: 10%;
+}
+
+.margin-left-button{
+  margin-left: 1%;
+}
