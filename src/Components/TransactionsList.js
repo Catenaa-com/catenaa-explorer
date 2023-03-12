@@ -6,6 +6,7 @@ import Typography from '@mui/material/Typography';
 import { CardActionArea } from '@mui/material';
 import '../App.css';
 import { useGlobalState } from './GlobalState';
+
 const solanaWeb3 = require('@solana/web3.js');
 const endPoint = 'https://morning-hidden-borough.solana-mainnet.discover.quiknode.pro/082d71ec6cc4267aa35fa96a1ac74df4441aa5d8/';
 const solanaConnection = new solanaWeb3.Connection(endPoint);
@@ -21,7 +22,9 @@ function TransactionList() {
     const apiKey = "JPX7Z89GQBZC53W1Z4C5QFUJ18Y4IYR31F";
     const apiUrl = `https://api.etherscan.io/api?module=account&action=txlist&address=${walletAddress}&apikey=${apiKey}`;
     const [globalState, setGlobalState] = useGlobalState();
-    const [encoded, setEncode] = useState('');
+    const contractAddress = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"; 
+    const startBlock = "0"; 
+    const endBlock = "latest"; 
 
     const fetchSolanaTransactions = async (address, numTxt) => {
         setLoading(false);
@@ -75,6 +78,18 @@ function TransactionList() {
         setLoading(true);
     }
 
+    const fetchAmountForEthereumSwapAndBridgeTransaction = async (walletAddress, txhash) => {
+        const url = `https://api.etherscan.io/api?module=account&action=tokentx&contractaddress=${contractAddress}&address=${walletAddress}&startblock=${startBlock}&endblock=${endBlock}&sort=asc&apikey=${apiKey}`;
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            const getHashStatus = await data.result.filter(tx => tx.hash == txhash).slice(0, 1).shift();
+            return getHashStatus;
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
     const fetchEthereumTransactions = async () => {
         setLoading(false);
         if (!walletAddress) {
@@ -85,9 +100,17 @@ function TransactionList() {
             const data = await response.json();
             const List = [];
             if (data.status === "1") {
-                data.result.map((tx) => {
-                    var time = parseInt(tx.timeStamp);
-                    var amount = parseInt(tx.value);
+                for (const tx of data.result) {
+                    let value = 0;
+                    if (tx.methodId == "0xf35e37d3") {
+                        const getFilteredData = await fetchAmountForEthereumSwapAndBridgeTransaction(walletAddress, tx.hash);
+                        value = parseInt(getFilteredData.value);
+                    }
+                    else {
+                        value = tx.value;
+                    }
+                    const amount = parseInt(value);
+                    const time = parseInt(tx.timeStamp);
                     List.push({
                         hash: tx.hash,
                         timeStamp: time,
@@ -96,13 +119,13 @@ function TransactionList() {
                         to: tx.to,
                         Status: "",
                         value: amount
-                    })
-                })
+                    });
+                }
                 const OutBound = List.filter(tx => tx.from.includes(walletAddress.toLowerCase()));
                 const InBound = List.filter(tx => tx.to.includes(walletAddress.toLowerCase()));
                 setOutboundTransactions(outboundTransactions => [...outboundTransactions, ...OutBound]);
                 setInboundTransactions(inboundTransactions => [...inboundTransactions, ...InBound]);
-                console.log(data.result);
+                console.log(OutBound);
                 setLoading(true);
             } else {
                 console.error(data.message);
@@ -113,32 +136,34 @@ function TransactionList() {
     }
 
     useEffect(() => {
+        async function effectHandler() {
             if (searchClicked) {
                 if (network == "Ethereum") {
-                    fetchEthereumTransactions();
+                    await fetchEthereumTransactions();
                     setSearchClicked(false);
                 }
                 else if (network == "Solana") {
-                    fetchSolanaTransactions(walletAddress, 1000);
+                    await fetchSolanaTransactions(walletAddress, 1000);
                     setSearchClicked(false);
                 }
             }
-               
+        };
+        effectHandler();
     }, [searchClicked, walletAddress, apiUrl]);
 
     useEffect(() => {
-        if (globalState.inBound){
+        if (globalState.inBound) {
             setInboundTransactions(globalState.inBound);
         }
-        if (globalState.outBound){
+        if (globalState.outBound) {
             setOutboundTransactions(globalState.outBound);
         }
-    },[])
+    }, [])
 
     const clearList = () => {
         setInboundTransactions([]);
         setOutboundTransactions([]);
-        setGlobalState({ outBound: [], inBound: []})
+        setGlobalState({ outBound: [], inBound: [] })
     }
 
     const handleWalletAddressChange = (event) => {
