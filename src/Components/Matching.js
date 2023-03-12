@@ -50,24 +50,35 @@ function Matching() {
 
     return (
         <div>
-            <Link className='btn btn-success' to='/'> Back</Link>
+            <header className='inner'>
+                <Link to='/'> Back</Link>
+                <h3>Matching Transaction Results</h3>
+            </header>
+
+            <main className="container inner">
+                <div className='row'>
+                    <div className="col">
+
             {dataList.map((distanceObj, i) => {
                 console.log(distanceObj.outboundTxn.hash);
                 return (
                     <div>
-                        <Card key={distanceObj.outboundTxn.hash} sx={{ maxWidth: 400 }} className="card-margin">
+                        <Card key={distanceObj.outboundTxn.hash} className="card-margin">
                             <CardActionArea>
                                 <CardContent>
                                     <Typography gutterBottom className="title" component="div">
-                                        Transaction Hash : {distanceObj.outboundTxn.hash}
+                                        <h4>Transaction Hash:</h4>
+                                        <label>{distanceObj.outboundTxn.hash}</label>
                                     </Typography>
 
                                     <Typography gutterBottom className="title" component="div">
-                                        Block Number : {distanceObj.outboundTxn.blockNumber}
+                                        <h4>Block Number:</h4>
+                                        <label>{distanceObj.outboundTxn.blockNumber}</label>
                                     </Typography>
 
                                     <Typography gutterBottom className="title" component="div">
-                                        Amount : {distanceObj.outboundTxn.value}
+                                        <h4>Amount:</h4>
+                                        <label>{distanceObj.outboundTxn.value}</label>
                                     </Typography>
 
                                     <Typography gutterBottom className="title" component="div">
@@ -82,11 +93,13 @@ function Matching() {
                                         <div></div>
                                     }
                                     <Typography gutterBottom className="title" component="div">
-                                        From : {distanceObj.outboundTxn.from}
+                                        <h4>From:</h4>
+                                        <label>{distanceObj.outboundTxn.from}</label>
                                     </Typography>
 
                                     <Typography gutterBottom className="title" component="div">
-                                        To : {distanceObj.outboundTxn.to}
+                                        <h4>To:</h4>
+                                        <label>{distanceObj.outboundTxn.to}</label>
                                     </Typography>
                                 </CardContent>
                             </CardActionArea>
@@ -98,23 +111,27 @@ function Matching() {
                                 .map((inTxn) => {
                                     return (
                                         <div>
-                                            <Card key={inTxn.inboundTxn.hash} sx={{ maxWidth: 400 }} className="card-margin">
+                                            <Card key={inTxn.inboundTxn.hash} className="card-margin">
                                                 <CardActionArea>
                                                     <CardContent>
                                                         <Typography gutterBottom className="title" component="div">
-                                                            Transaction Hash : {inTxn.inboundTxn.hash}
+                                                            <h4>Transaction Hash:</h4>
+                                                            <label>{inTxn.inboundTxn.hash}</label>
                                                         </Typography>
 
                                                         <Typography gutterBottom className="title" component="div">
-                                                            Block Number : {inTxn.inboundTxn.blockNumber}
+                                                            <h4>Block Number:</h4>
+                                                            <label>{inTxn.inboundTxn.blockNumber}</label>
                                                         </Typography>
 
                                                         <Typography gutterBottom className="title" component="div">
-                                                            Amount : {inTxn.inboundTxn.value}
+                                                            <h4>Amount:</h4>
+                                                            <label>{inTxn.inboundTxn.value}</label>
                                                         </Typography>
 
                                                         <Typography gutterBottom className="title" component="div">
-                                                            Timestamp : {new Date(parseInt(inTxn.inboundTxn.timeStamp) * 1000).toLocaleString()}
+                                                            <h4>Timestamp:</h4>
+                                                            <label>{new Date(parseInt(inTxn.inboundTxn.timeStamp) * 1000).toLocaleString()}</label>
                                                         </Typography>
 
                                                         {inTxn.inboundTxn.Status === "true" ?
@@ -125,15 +142,18 @@ function Matching() {
                                                             <div></div>
                                                         }
                                                         <Typography gutterBottom className="title" component="div">
-                                                            From : {inTxn.inboundTxn.from}
+                                                            <h4>From:</h4> 
+                                                            <label>{inTxn.inboundTxn.from}</label>
                                                         </Typography>
 
                                                         <Typography gutterBottom className="title" component="div">
-                                                            To : {inTxn.inboundTxn.to}
+                                                            <h4>To:</h4>
+                                                            <label>{inTxn.inboundTxn.to}</label>
                                                         </Typography>
 
                                                         <Typography gutterBottom className="title" component="div">
-                                                            Distance : {inTxn.distance}
+                                                            <h4>Distance:</h4>
+                                                            <label>{inTxn.distance}</label>
                                                         </Typography>
                                                     </CardContent>
                                                 </CardActionArea>
@@ -265,7 +285,8 @@ function Matching() {
                         </div>
                     </div>
                 )
-            })} */}
+            })} */}</div></div>
+            </main>
         </div>
     );
 }
