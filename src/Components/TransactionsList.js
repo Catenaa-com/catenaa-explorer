@@ -228,7 +228,7 @@ function TransactionList() {
                                 </li>
                                 <li>
                                     <Link onClick={handlePassParams} to="/matching" className='btn btn-primary-outline'>Match transaction</Link>
-                                    {/* <button className='btn btn-danger margin-left-button' onClick={clearList}>Clear</button> */}
+                                    <Link onClick={clearList} className='px-4'>Clear</Link>
                                 </li>
                             </ul>
                         </div>
