@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
-import { CardActionArea } from '@mui/material';
+import { CardActionArea, Chip } from '@mui/material';
 import logo from '../logo.svg';
 import '../App.css';
 import { useGlobalState } from './GlobalState';
@@ -23,18 +23,19 @@ function TransactionList() {
     const apiKey = "JPX7Z89GQBZC53W1Z4C5QFUJ18Y4IYR31F";
     const apiUrl = `https://api.etherscan.io/api?module=account&action=txlist&address=${walletAddress}&apikey=${apiKey}`;
     const [globalState, setGlobalState] = useGlobalState();
-    const contractAddress = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"; 
-    const startBlock = "0"; 
-    const endBlock = "latest"; 
+    const contractAddress = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
+    const startBlock = "0";
+    const endBlock = "latest";
 
     const fetchSolanaTransactions = async (address, numTxt) => {
+        const solanaAmountNormalizationValue = 1000000;
         setLoading(false);
         const publicKey = new solanaWeb3.PublicKey(address);
         let transList = await solanaConnection.getSignaturesForAddress(publicKey, { limit: numTxt });
         let signatureList = transList.map(transaction => transaction.signature);
         let TransactionDetails = await solanaConnection.getParsedTransactions(signatureList);
         const List = [];
-        let IsBridge = "false";
+        let isCrossChain = false;
         console.log(TransactionDetails);
         transList.forEach(async (transaction, index) => {
             const date = new Date(transaction.blockTime * 1000);
@@ -49,17 +50,17 @@ function TransactionList() {
             console.log(typeof transaction.blockTime);
             if (amount == undefined) {
                 TransactionDetails.map((test) => {
-                    amount = test.meta.innerInstructions[1].instructions[1].parsed.info.amount / 1000000;
+                    amount = test.meta.innerInstructions[1].instructions[1].parsed.info.amount / solanaAmountNormalizationValue;
                 })
             } else {
-                amount = transactionIntruction[0].parsed.info.lamports;
+                amount = transactionIntruction[0].parsed.info.lamports / solanaAmountNormalizationValue;
             }
 
             if (toAddress == undefined) {
-                IsBridge = "true";
+                isCrossChain = true;
                 toAddress = walletAddress;
             } else {
-                IsBridge = "false";
+                isCrossChain = false;
             }
             List.push({
                 hash: transaction.signature,
@@ -67,8 +68,9 @@ function TransactionList() {
                 blockNumber: transaction.slot,
                 from: fromAddress,
                 to: toAddress,
-                Status: IsBridge,
-                value: amount
+                isCrossChain: isCrossChain,
+                value: amount,
+                network: network
             })
         });
         console.log(List);
@@ -92,6 +94,7 @@ function TransactionList() {
     }
 
     const fetchEthereumTransactions = async () => {
+        const ethereumNormalizationValue = 1000000;
         setLoading(false);
         if (!walletAddress) {
             return;
@@ -103,14 +106,18 @@ function TransactionList() {
             if (data.status === "1") {
                 for (const tx of data.result) {
                     let value = 0;
+                    let isCrossChain = false;
                     if (tx.methodId == "0xf35e37d3") {
                         const getFilteredData = await fetchAmountForEthereumSwapAndBridgeTransaction(walletAddress, tx.hash);
+                        isCrossChain = true;
                         value = parseInt(getFilteredData.value);
                     }
                     else {
                         value = tx.value;
+                        isCrossChain = false;
+
                     }
-                    const amount = parseInt(value);
+                    const amount = parseInt(value) / ethereumNormalizationValue;
                     const time = parseInt(tx.timeStamp);
                     List.push({
                         hash: tx.hash,
@@ -118,8 +125,9 @@ function TransactionList() {
                         blockNumber: tx.blockNumber,
                         from: tx.from,
                         to: tx.to,
-                        Status: "",
-                        value: amount
+                        isCrossChain: isCrossChain,
+                        value: amount,
+                        network: network
                     });
                 }
                 const OutBound = List.filter(tx => tx.from.includes(walletAddress.toLowerCase()));
@@ -173,27 +181,25 @@ function TransactionList() {
 
     const handleSearchClick = () => {
         setLoading(false);
-        let solanaStatus = "";
+        let Status = false;
         if (outboundTransactions == "") {
             setSearchClicked(true);
         } else {
             outboundTransactions.forEach((tx) => {
                 if (tx.from == walletAddress.toLowerCase() || tx.from == walletAddress) {
-                    solanaStatus = "OK";
-                    setLoading(true);
-                    setSearchClicked(false);
+                    Status = true;
                 }
                 else {
-                    solanaStatus = "NO"
+                    Status = false
                     setSearchClicked(true);
                 }
             })
 
-            if (solanaStatus == "OK") {
+            if (Status) {
                 alert("This Wallet Address Entered Earlier");
                 setSearchClicked(false);
                 setLoading(true);
-            } else if (solanaStatus == "NO") {
+            } else {
                 setSearchClicked(true);
             }
         }
@@ -203,21 +209,18 @@ function TransactionList() {
         } else {
             inboundTransactions.forEach((tx) => {
                 if (tx.to === walletAddress || tx.to === walletAddress.toLowerCase()) {
-                    solanaStatus = "OK";
-                    setLoading(true);
-                    setSearchClicked(false);
+                    Status = true;
                 }
                 else {
-                    solanaStatus = "NO"
-                    setSearchClicked(true);
+                    Status = false;
                 }
             })
 
-            if (solanaStatus == "OK") {
+            if (Status) {
                 alert("This Wallet Address Entered Earlier");
                 setLoading(true);
                 setSearchClicked(false);
-            } else if (solanaStatus == "NO") {
+            } else {
                 setSearchClicked(true);
             }
         }
@@ -261,9 +264,9 @@ function TransactionList() {
                 </div>
                 <label className='loading' type="text">{Loading ? "" : "Data is loading..."}</label>
             </header>
-            
+
             <main className="container">
-                
+
                 <div className='row gx-5'>
                     <div className="col-6">
                         <h3>Outbound Transaction</h3>
@@ -273,18 +276,26 @@ function TransactionList() {
                                     <Card key={tx.hash} sx={{ maxWidth: 700 }}>
                                         <CardActionArea>
                                             <CardContent>
+                                                <Typography gutterBottom className="title" component="div" style={{ fontWeight: '600' }}>
+                                                    <Chip sx={{ m: .5 }} label={tx.network}></Chip>
+                                                    {tx.isCrossChain ?
+                                                        <Chip label="CROSSCHAIN"></Chip>
+                                                        :
+                                                        <span></span>
+                                                        // <div></div>
+                                                    }
+                                                    <Chip sx={{ m: .5 }} label={`BN : ${tx.blockNumber}`}></Chip>
+                                                </Typography>
+
                                                 <Typography gutterBottom className="title" component="div">
-                                                    <h4>Transaction Hash:</h4> 
+                                                    <h4>Transaction Hash:</h4>
                                                     <label className='sml'>{tx.hash}</label>
                                                 </Typography>
 
-                                                <Typography gutterBottom className="title" component="div">
-                                                    <h4>Block Number:</h4> 
-                                                    <label>{tx.blockNumber}</label>
-                                                </Typography>
+
 
                                                 <Typography gutterBottom className="title" component="div">
-                                                    <h4>Amount:</h4> 
+                                                    <h4>Amount:</h4>
                                                     <label>{tx.value}</label>
                                                 </Typography>
 
@@ -293,16 +304,10 @@ function TransactionList() {
                                                     <label>{new Date(parseInt(tx.timeStamp) * 1000).toLocaleString()}</label>
                                                 </Typography>
 
-                                                {tx.Status === "true" ?
-                                                    <Typography gutterBottom className="title" component="div" style={{ fontWeight: '600' }}>
-                                                        Is Bridge: {tx.Status}
-                                                    </Typography>
-                                                    :
-                                                    <div></div>
-                                                }
+
 
                                                 <Typography gutterBottom className="title" component="div">
-                                                    <h4>From:</h4> 
+                                                    <h4>From:</h4>
                                                     <label>{tx.from}</label>
                                                 </Typography>
 
@@ -326,14 +331,19 @@ function TransactionList() {
                                     <Card key={tx.hash} sx={{ maxWidth: 600 }}>
                                         <CardActionArea>
                                             <CardContent>
-                                                <Typography gutterBottom className="title" component="div">
-                                                    <h4>Transaction Hash:</h4>
-                                                    <label>{tx.hash}</label>
+                                                <Typography gutterBottom className="title" component="div" style={{ fontWeight: '600' }}>
+                                                    <Chip sx={{ m: .5 }} label={tx.network}></Chip>
+                                                    {tx.isCrossChain ?
+                                                        <Chip label="CROSSCHAIN"></Chip>
+                                                        :
+                                                        <span></span>
+                                                    }
+                                                    <Chip sx={{ m: .5 }} label={`BN : ${tx.blockNumber}`}></Chip>
                                                 </Typography>
 
                                                 <Typography gutterBottom className="title" component="div">
-                                                    <h4>Block Number:</h4>
-                                                    <label>{tx.blockNumber}</label>
+                                                    <h4>Transaction Hash:</h4>
+                                                    <label>{tx.hash}</label>
                                                 </Typography>
 
                                                 <Typography gutterBottom className="title" component="div">
@@ -345,14 +355,6 @@ function TransactionList() {
                                                     <h4>Timestamp:</h4>
                                                     <label>{new Date(parseInt(tx.timeStamp) * 1000).toLocaleString()}</label>
                                                 </Typography>
-
-                                                {tx.Status === "true" ?
-                                                    <Typography gutterBottom className="title" component="div" style={{ fontWeight: '600' }}>
-                                                        Is Bridge : {tx.Status}
-                                                    </Typography>
-                                                    :
-                                                    <div></div>
-                                                }
 
                                                 <Typography gutterBottom className="title" component="div">
                                                     <h4>From:</h4>
