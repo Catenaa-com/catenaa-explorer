@@ -8,46 +8,44 @@ import logo from '../logo.svg';
 import '../App.css';
 import { useGlobalState } from './GlobalState';
 
-const solanaWeb3 = require('@solana/web3.js');
-const endPoint = 'https://morning-hidden-borough.solana-mainnet.discover.quiknode.pro/082d71ec6cc4267aa35fa96a1ac74df4441aa5d8/';
-const solanaConnection = new solanaWeb3.Connection(endPoint);
-
 function TransactionList() {
-
     const [outboundTransactions, setOutboundTransactions] = useState([]);
     const [inboundTransactions, setInboundTransactions] = useState([]);
     const [walletAddress, setWalletAddress] = useState("");
     const [searchClicked, setSearchClicked] = useState(false);
     const [network, setNetwork] = useState("Ethereum");
     const [Loading, setLoading] = useState(true);
-    const apiKey = "JPX7Z89GQBZC53W1Z4C5QFUJ18Y4IYR31F";
-    const apiUrl = `https://api.etherscan.io/api?module=account&action=txlist&address=${walletAddress}&apikey=${apiKey}`;
     const [globalState, setGlobalState] = useGlobalState();
-    const contractAddress = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
-    const startBlock = "0";
-    const endBlock = "latest";
+    const ethererumAPIKey = "JPX7Z89GQBZC53W1Z4C5QFUJ18Y4IYR31F";
+    const ethererumAPIUrl = `https://api.etherscan.io/api?module=account&action=txlist&address=${walletAddress}&apikey=${ethererumAPIKey}`;
 
     const fetchSolanaTransactions = async (address, numTxt) => {
-        const solanaAmountNormalizationValue = 1000000;
+        //import Solana and create Solana conncetion
+        const solanaWeb3 = require('@solana/web3.js');
+        const endPoint = 'https://morning-hidden-borough.solana-mainnet.discover.quiknode.pro/082d71ec6cc4267aa35fa96a1ac74df4441aa5d8/';
+        const solanaConnection = new solanaWeb3.Connection(endPoint);
         setLoading(false);
+
+        const solanaAmountNormalizationValue = 1000000;
         const publicKey = new solanaWeb3.PublicKey(address);
+
+        //Retrieving data from Solana API
         let transList = await solanaConnection.getSignaturesForAddress(publicKey, { limit: numTxt });
         let signatureList = transList.map(transaction => transaction.signature);
         let TransactionDetails = await solanaConnection.getParsedTransactions(signatureList);
-        const List = [];
         let isCrossChain = false;
-        console.log(TransactionDetails);
+        const List = [];
+
         transList.forEach(async (transaction, index) => {
-            const date = new Date(transaction.blockTime * 1000);
-            const transactionIntruction = TransactionDetails[index].transaction.message.instructions;
-            const dateString = `${date.getDay()}/${date.getMonth()}/${date.getFullYear()}, ${date.getHours()}.${date.getMinutes()}.${date.getSeconds()}`
             let fromAddress;
             let toAddress;
             let amount;
+            const transactionIntruction = TransactionDetails[index].transaction.message.instructions;
             fromAddress = transactionIntruction[0].parsed.info.source;
             toAddress = transactionIntruction[0].parsed.info.destination;
             amount = transactionIntruction[0].parsed.info.lamports;
-            console.log(typeof transaction.blockTime);
+
+            //Finding amount from crosschain
             if (amount == undefined) {
                 TransactionDetails.map((test) => {
                     amount = test.meta.innerInstructions[1].instructions[1].parsed.info.amount / solanaAmountNormalizationValue;
@@ -56,12 +54,14 @@ function TransactionList() {
                 amount = transactionIntruction[0].parsed.info.lamports / solanaAmountNormalizationValue;
             }
 
+            //Find out is it crosschain or not
             if (toAddress == undefined) {
                 isCrossChain = true;
                 toAddress = walletAddress;
             } else {
                 isCrossChain = false;
             }
+
             List.push({
                 hash: transaction.signature,
                 timeStamp: transaction.blockTime,
@@ -73,7 +73,7 @@ function TransactionList() {
                 network: network
             })
         });
-        console.log(List);
+
         const InBound = List.filter(tx => tx.to.includes(walletAddress));
         const OutBound = List.filter(tx => tx.from.includes(walletAddress));
         setInboundTransactions(inboundTransactions => [...inboundTransactions, ...InBound]);
@@ -81,10 +81,15 @@ function TransactionList() {
         setLoading(true);
     }
 
+    //Create method to get amount in Ethereum Swap and Bridge transaction
     const fetchAmountForEthereumSwapAndBridgeTransaction = async (walletAddress, txhash) => {
-        const url = `https://api.etherscan.io/api?module=account&action=tokentx&contractaddress=${contractAddress}&address=${walletAddress}&startblock=${startBlock}&endblock=${endBlock}&sort=asc&apikey=${apiKey}`;
+        const contractAddress = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
+        const startBlock = "0";
+        const endBlock = "latest";
+        const solanaAPIUrl = `https://api.etherscan.io/api?module=account&action=tokentx&contractaddress=${contractAddress}&address=${walletAddress}&startblock=${startBlock}&endblock=${endBlock}&sort=asc&apikey=${ethererumAPIKey}`;
+
         try {
-            const response = await fetch(url);
+            const response = await fetch(solanaAPIUrl);
             const data = await response.json();
             const getHashStatus = await data.result.filter(tx => tx.hash == txhash).slice(0, 1).shift();
             return getHashStatus;
@@ -93,6 +98,7 @@ function TransactionList() {
         }
     }
 
+    //Create method to get transaction from Ethereum network
     const fetchEthereumTransactions = async () => {
         const ethereumNormalizationValue = 1000000;
         setLoading(false);
@@ -100,7 +106,7 @@ function TransactionList() {
             return;
         }
         try {
-            const response = await fetch(apiUrl);
+            const response = await fetch(ethererumAPIUrl);
             const data = await response.json();
             const List = [];
             if (data.status === "1") {
@@ -130,11 +136,11 @@ function TransactionList() {
                         network: network
                     });
                 }
+
                 const OutBound = List.filter(tx => tx.from.includes(walletAddress.toLowerCase()));
                 const InBound = List.filter(tx => tx.to.includes(walletAddress.toLowerCase()));
                 setOutboundTransactions(outboundTransactions => [...outboundTransactions, ...OutBound]);
                 setInboundTransactions(inboundTransactions => [...inboundTransactions, ...InBound]);
-                console.log(OutBound);
                 setLoading(true);
             } else {
                 console.error(data.message);
@@ -158,7 +164,7 @@ function TransactionList() {
             }
         };
         effectHandler();
-    }, [searchClicked, walletAddress, apiUrl]);
+    }, [searchClicked, walletAddress, ethererumAPIUrl]);
 
     useEffect(() => {
         if (globalState.inBound) {
@@ -182,6 +188,8 @@ function TransactionList() {
     const handleSearchClick = () => {
         setLoading(false);
         let Status = false;
+
+        //Outbound
         if (outboundTransactions == "") {
             setSearchClicked(true);
         } else {
@@ -204,6 +212,7 @@ function TransactionList() {
             }
         }
 
+        //Inbound
         if (inboundTransactions == "") {
             setSearchClicked(true);
         } else {
@@ -256,7 +265,9 @@ function TransactionList() {
                                 </li>
                                 <li>
                                     <Link onClick={handlePassParams} to="/matching" className='btn btn-primary-outline'>Match transaction</Link>
-                                    <Link onClick={clearList} className='px-4'>Clear</Link>
+                                </li>
+                                <li>
+                                    <Link onClick={clearList} className='px-4 btn btn-primary-outline'>Clear</Link>
                                 </li>
                             </ul>
                         </div>
@@ -266,7 +277,6 @@ function TransactionList() {
             </header>
 
             <main className="container">
-
                 <div className='row gx-5'>
                     <div className="col-6">
                         <h3>Outbound Transaction</h3>
@@ -282,7 +292,6 @@ function TransactionList() {
                                                         <Chip label="CROSSCHAIN"></Chip>
                                                         :
                                                         <span></span>
-                                                        // <div></div>
                                                     }
                                                     <Chip sx={{ m: .5 }} label={`BN : ${tx.blockNumber}`}></Chip>
                                                 </Typography>
@@ -291,8 +300,6 @@ function TransactionList() {
                                                     <h4>Transaction Hash:</h4>
                                                     <label className='sml'>{tx.hash}</label>
                                                 </Typography>
-
-
 
                                                 <Typography gutterBottom className="title" component="div">
                                                     <h4>Amount:</h4>
@@ -304,8 +311,6 @@ function TransactionList() {
                                                     <label>{new Date(parseInt(tx.timeStamp) * 1000).toLocaleString()}</label>
                                                 </Typography>
 
-
-
                                                 <Typography gutterBottom className="title" component="div">
                                                     <h4>From:</h4>
                                                     <label>{tx.from}</label>
@@ -315,7 +320,6 @@ function TransactionList() {
                                                     <h4>To:</h4>
                                                     <label>{tx.to}</label>
                                                 </Typography>
-
                                             </CardContent>
                                         </CardActionArea>
                                     </Card>
@@ -323,6 +327,7 @@ function TransactionList() {
                             })}
                         </div>
                     </div>
+
                     <div className="col-6 block-inbound">
                         <h3>Inbound Transaction</h3>
                         <div className='card-holder'>
@@ -365,7 +370,6 @@ function TransactionList() {
                                                     <h4>To:</h4>
                                                     <label>{tx.to}</label>
                                                 </Typography>
-
                                             </CardContent>
                                         </CardActionArea>
                                     </Card>

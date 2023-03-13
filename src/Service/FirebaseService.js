@@ -1,3 +1,4 @@
+//Using firebase service to host this web
 const firebaseConfig = {
     apiKey: "AIzaSyAox7ynyF7d_U2p8f1jaWciw5DfyPpesb4",
     authDomain: "catenaaexplorerpoc.firebaseapp.com",
