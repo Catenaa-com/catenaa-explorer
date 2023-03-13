@@ -1,5 +1,7 @@
-.App {
-  text-align: center;
+html,
+body {
+  color: #111111;
+  background-color: #eee;
 }
 
 .App-logo {
@@ -37,80 +39,127 @@
   }
 }
 
-.Menu
-{
-  box-sizing: border-box;
-  height: 20%;
-  width: 100%;
-  background-color: #282c34;
-  position: fixed;
-  z-index: 1;
+header {
+    background-color: #111111;
+    width: 100%;
+    position: fixed;
+    z-index: 1;
 }
 
-.d-flex
-{
-  position: relative;
-  top: 15%;
-}
-.text-box
-{
-  width: 400px;
+header.inner {
+    padding: 1rem;
 }
 
-.select-dropdown
-{
-  width: 200px;
-}
-.row {
-  position: relative;
-  top: -50px;
-
+header.inner h3 {
+    color: white;
+    padding-top: .5rem;
 }
 
-.column {
-  float: left;
-  width: 50%;
-  padding: 10px;
-  height: 300px; /* Should be removed. Only for demonstration */
+header.inner .btn {
+    padding-left: 2rem;
+    padding-right: 2rem;
 }
 
-/* Clear floats after the columns */
-.row:after {
-  content: "";
-  display: table;
-  clear: both;
+header ul.d-flex {
+    list-style-type: none;
+    align-items: center;
+    justify-content: center;
+    column-gap: 1rem;
 }
 
-.title
-{
-  font-size: 10px !important;
-  word-wrap: break-word;      
+header .logo {
+    margin: 0 auto;
+    display: block;
+    text-align: center;
+    margin-bottom: 2rem;
+    margin-top: 1rem;
 }
 
-.card-margin 
-{
-  z-index: -1;
-  margin-bottom: 1%;
-  background-color: #5c5e62 !important;
-  color: azure !important;
+header input.form-control,
+header select.form-select {
+    border: 1px solid white;
+    padding: .8rem 1.5rem;
+    color: #111111;
+    min-width: 30rem;
+}
+header input.form-control:focus {
+    color: #111111;
+}
+header select.form-select {
+    padding: .8rem 2rem .8rem 1.5rem;
+    min-width: 10rem;
 }
 
-.list-margin
-{
-  margin-top: 10%;
+header .btn {
+  padding: .8rem 1rem;
 }
 
-.left-column-margin
-{
-  margin-left: 10%;
+header .btn.btn-primary {
+    background-color: #0069E8;
 }
 
-.right-column-margin
-{
-  margin-left: 15% !important;
+header .btn.btn-primary-outline {
+    background-color: transparent;
+    border: 2px solid #e85200;
+    color: #e85200;
 }
 
-.bottom-navbar{
+.loading {
+    text-align: center;
+    display: block;
+    width: 100%;
+    color: white;
+}
+
+
+main {
+    padding-top: 11.5rem;
+}
+main.inner {
+  padding-top: 9.5rem;
+}
+
+main .card-holder {
+    margin-top: 1rem;
+}
+
+main .MuiPaper-root {
+    background-color: white;
+    color: #111111;
+    border-left: 5px solid #0069E8;
+    border-radius: 10px;
+    box-shadow: none;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+main .block-inbound .MuiPaper-root {
+    border-left: 5px solid #e85200;
+}
+
+main .MuiCardContent-root {
+    padding: 0;
+}
+
+.css-1v2exvi-MuiCardActionArea-focusHighlight {
+  background-color: white !important;
+}
+
+main h3,
+main h4 {
+    font-size: 1.4rem;
+    font-weight: bold;
+}
+
+main .MuiTypography-root h4 {
+    font-size: 1rem;
+    margin-bottom: .2rem;
+}
+
+
+
+
+.bottom-navbar {
   box-sizing: border-box;
   width: 100%;
   height: 75px;
