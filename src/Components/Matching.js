@@ -101,7 +101,7 @@ function Matching() {
                                             </CardContent>
                                         </CardActionArea>
                                     </Card>
-                                    <div className='margin-subList'>
+                                    <div className='margin-subList block-inbound'>
                                         {distanceObj.mappedInboundTxns
                                             .sort((a, b) => a.distance - b.distance)
                                             .slice(0, 3)
